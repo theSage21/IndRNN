@@ -40,7 +40,7 @@ class IndRNN(nn.Module):
         super().__init__()
         self.inpdim = inpdim
         self.recdim = recdim
-        self.cells = [IndRNN(inpdim, recdim)
+        self.cells = [IndRNNCell(inpdim, recdim)
                       for _ in range(depth)]
         self.depth = depth
 
