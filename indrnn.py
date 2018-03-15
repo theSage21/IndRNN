@@ -5,6 +5,12 @@ from torch.autograd import Variable
 
 
 class IndRNNCell(nn.Module):
+    """
+    IndRNN Cell
+
+    Performs a single time step operation
+
+    """
     def __init__(self, inpdim, recdim, act=None):
         super().__init__()
         self.inpdim = inpdim
@@ -20,17 +26,30 @@ class IndRNNCell(nn.Module):
 
 
 class IndRNN(nn.Module):
-    def __init__(self, inpdim, recdim):
+    """
+    IndRNN
+
+    Given an input sequence, converts it to an output sequence.
+    """
+    def __init__(self, inpdim, recdim, depth=1):
+        """
+        inpdim      : dimension D in (Batch, Time, D)
+        recdim      : recurrent dimension/ Units/
+        depth       : stack depth
+        """
         super().__init__()
         self.inpdim = inpdim
         self.recdim = recdim
-        self.cell = IndRNN(inpdim, recdim)
+        self.cells = [IndRNN(inpdim, recdim)
+                      for _ in range(depth)]
+        self.depth = depth
 
     def forward(self, x):
         h_tm1 = Variable(th.ones(self.recdim))
         seq = []
         for i in range(x.size()[1]):
             x_t = x[:, i, :]
-            h_tm1 = self.cell.forward(x_t, h_tm1)
+            for cell in self.cells:
+                h_tm1 = cell.forward(x_t, h_tm1)
             seq.append(h_tm1)
         return th.stack(seq, dim=1)
